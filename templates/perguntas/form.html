@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo }} - TCC Questions{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div>
+        <h2 class="text-3xl font-bold text-gray-900">{{ titulo }}</h2>
+        <p class="mt-2 text-sm text-gray-600">{% if pergunta %}Editar pergunta do dataset{% else %}Adicionar nova pergunta ao dataset{% endif %}</p>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <form method="post" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Número -->
+                    <div>
+                        <label for="numero" class="block text-sm font-medium text-gray-700">Número da Pergunta</label>
+                        <input type="number" id="numero" name="numero" min="1" max="92" required
+                               value="{% if pergunta %}{{ pergunta.numero }}{% endif %}"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <p class="mt-1 text-xs text-gray-500">Número sequencial da pergunta (1-92)</p>
+                    </div>
+
+                    <!-- Norma Técnica -->
+                    <div>
+                        <label for="norma_tecnica" class="block text-sm font-medium text-gray-700">Norma Técnica</label>
+                        <input type="text" id="norma_tecnica" name="norma_tecnica" required
+                               value="{% if pergunta %}{{ pergunta.norma_tecnica }}{% endif %}"
+                               placeholder="Ex: NT-09"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <p class="mt-1 text-xs text-gray-500">Código da norma técnica</p>
+                    </div>
+
+                    <!-- Item -->
+                    <div>
+                        <label for="item" class="block text-sm font-medium text-gray-700">Item</label>
+                        <input type="text" id="item" name="item" required
+                               value="{% if pergunta %}{{ pergunta.item }}{% endif %}"
+                               placeholder="Ex: 6.7.3"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <p class="mt-1 text-xs text-gray-500">Item específico da norma</p>
+                    </div>
+                </div>
+
+                <!-- Texto da Pergunta -->
+                <div>
+                    <label for="texto" class="block text-sm font-medium text-gray-700">Texto da Pergunta</label>
+                    <textarea id="texto" name="texto" rows="4" required
+                              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Digite o texto completo da pergunta...">{% if pergunta %}{{ pergunta.texto }}{% endif %}</textarea>
+                    <p class="mt-1 text-xs text-gray-500">Pergunta que será apresentada aos modelos LLM</p>
+                </div>
+
+                <!-- Resposta Esperada -->
+                <div>
+                    <label for="resposta_esperada" class="block text-sm font-medium text-gray-700">Resposta Esperada</label>
+                    <textarea id="resposta_esperada" name="resposta_esperada" rows="3" required
+                              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Digite a resposta correta esperada...">{% if pergunta %}{{ pergunta.resposta_esperada }}{% endif %}</textarea>
+                    <p class="mt-1 text-xs text-gray-500">Resposta correta que será usada para avaliar os modelos</p>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                    <a href="/perguntas" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                        {% if pergunta %}Atualizar{% else %}Criar{% endif %} Pergunta
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-yellow-800">Diretrizes para Perguntas</h3>
+                <div class="mt-2 text-sm text-yellow-700">
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>Número:</strong> Use números sequenciais únicos (1-92)</li>
+                        <li><strong>Texto:</strong> Seja claro e específico, incluindo todos os dados necessários</li>
+                        <li><strong>Resposta:</strong> Forneça a resposta exata esperada conforme a norma técnica</li>
+                        <li><strong>Norma Técnica:</strong> Use o código da norma (ex: NT-09)</li>
+                        <li><strong>Item:</strong> Especifique o item exato da norma (ex: 6.7.3)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview -->
+    {% if pergunta %}
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Preview da Pergunta</h3>
+            <div class="bg-gray-50 rounded-md p-4">
+                <div class="flex items-start space-x-3">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        #{{ pergunta.numero }}
+                    </span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        {{ pergunta.norma_tecnica }}
+                    </span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        {{ pergunta.item }}
+                    </span>
+                </div>
+                <div class="mt-3">
+                    <p class="text-sm text-gray-900">{{ pergunta.texto }}</p>
+                    <div class="mt-3 pt-3 border-t border-gray-200">
+                        <p class="text-xs text-gray-600"><strong>Resposta esperada:</strong> {{ pergunta.resposta_esperada }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

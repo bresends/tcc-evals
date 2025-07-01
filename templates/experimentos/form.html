@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}{{ titulo }} - TCC Questions{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div>
+        <h2 class="text-3xl font-bold text-gray-900">{{ titulo }}</h2>
+        <p class="mt-2 text-sm text-gray-600">Preencha as métricas do experimento</p>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <form method="post" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Pergunta -->
+                    <div>
+                        <label for="pergunta_id" class="block text-sm font-medium text-gray-700">Pergunta</label>
+                        <select id="pergunta_id" name="pergunta_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Selecione uma pergunta</option>
+                            {% for pergunta in perguntas %}
+                            <option value="{{ pergunta.id }}" {% if resposta and resposta.pergunta_id == pergunta.id %}selected{% endif %}>
+                                #{{ pergunta.numero }} - {{ pergunta.norma_artigo }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Modelo -->
+                    <div>
+                        <label for="modelo_id" class="block text-sm font-medium text-gray-700">Modelo LLM</label>
+                        <select id="modelo_id" name="modelo_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Selecione um modelo</option>
+                            {% for modelo in modelos %}
+                            <option value="{{ modelo.id }}" {% if resposta and resposta.modelo_id == modelo.id %}selected{% endif %}>
+                                {{ modelo.nome }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Métricas de Tempo -->
+                <div class="border-t border-gray-200 pt-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Métricas de Tempo</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="tempo_primeira_resposta" class="block text-sm font-medium text-gray-700">Tempo Primeira Resposta (segundos)</label>
+                            <input type="number" step="0.01" id="tempo_primeira_resposta" name="tempo_primeira_resposta" 
+                                   value="{% if resposta and resposta.tempo_primeira_resposta %}{{ resposta.tempo_primeira_resposta }}{% endif %}"
+                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="tempo_total" class="block text-sm font-medium text-gray-700">Tempo Total (segundos)</label>
+                            <input type="number" step="0.01" id="tempo_total" name="tempo_total" 
+                                   value="{% if resposta and resposta.tempo_total %}{{ resposta.tempo_total }}{% endif %}"
+                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Métricas de Qualidade -->
+                <div class="border-t border-gray-200 pt-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Métricas de Qualidade</h3>
+                    
+                    <!-- Checkboxes -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="flex items-center">
+                            <input id="resposta_correta" name="resposta_correta" type="checkbox" value="true"
+                                   {% if resposta and resposta.resposta_correta %}checked{% endif %}
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="resposta_correta" class="ml-2 block text-sm text-gray-900">Resposta Correta</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="fonte_citada" name="fonte_citada" type="checkbox" value="true"
+                                   {% if resposta and resposta.fonte_citada %}checked{% endif %}
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="fonte_citada" class="ml-2 block text-sm text-gray-900">Fonte Citada</label>
+                        </div>
+                    </div>
+
+                    <!-- Escalas -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="clareza" class="block text-sm font-medium text-gray-700">Clareza (1-5)</label>
+                            <select id="clareza" name="clareza" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Selecione</option>
+                                {% for i in range(1, 6) %}
+                                <option value="{{ i }}" {% if resposta and resposta.clareza == i %}selected{% endif %}>{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="precisao" class="block text-sm font-medium text-gray-700">Precisão (1-5)</label>
+                            <select id="precisao" name="precisao" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Selecione</option>
+                                {% for i in range(1, 6) %}
+                                <option value="{{ i }}" {% if resposta and resposta.precisao == i %}selected{% endif %}>{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="concisao" class="block text-sm font-medium text-gray-700">Concisão (1-5)</label>
+                            <select id="concisao" name="concisao" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Selecione</option>
+                                {% for i in range(1, 6) %}
+                                <option value="{{ i }}" {% if resposta and resposta.concisao == i %}selected{% endif %}>{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observações -->
+                <div class="border-t border-gray-200 pt-6">
+                    <label for="observacoes" class="block text-sm font-medium text-gray-700">Observações</label>
+                    <textarea id="observacoes" name="observacoes" rows="3" 
+                              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Observações qualitativas sobre a resposta do modelo...">{% if resposta and resposta.observacoes %}{{ resposta.observacoes }}{% endif %}</textarea>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                    <a href="/experimentos" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                        {% if resposta %}Atualizar{% else %}Salvar{% endif %} Experimento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-blue-800">Instruções</h3>
+                <div class="mt-2 text-sm text-blue-700">
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>Tempo:</strong> Medido em segundos com precisão de centésimos</li>
+                        <li><strong>Qualidade:</strong> Escalas de 1 (ruim) a 5 (excelente)</li>
+                        <li><strong>Somatório:</strong> Calculado automaticamente baseado nas métricas</li>
+                        <li><strong>Observações:</strong> Insights qualitativos importantes para análise</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

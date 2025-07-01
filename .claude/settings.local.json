@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(bunx:*)",
+      "Bash(bun add:*)",
+      "Bash(uv sync:*)",
+      "Bash(uv run alembic:*)",
+      "Bash(curl:*)",
+      "Bash(grep:*)",
+      "Bash(uv run:*)",
+      "Bash(rm:*)"
+    ],
+    "deny": []
+  }
+}

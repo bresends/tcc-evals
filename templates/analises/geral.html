@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block title %}Análises - TCC Questions{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header Section -->
+    <div class="bg-gradient-to-br from-blue-50 via-white to-purple-50 rounded-2xl p-8 shadow-sm border border-gray-100">
+        <div class="flex justify-between items-start">
+            <div class="flex-1">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                            Análises Estatísticas
+                        </h1>
+                        <p class="text-gray-600 font-medium">Comparação de desempenho entre {{ stats_data|length if stats_data else 0 }} modelos LLM</p>
+                    </div>
+                </div>
+                <p class="text-gray-600 max-w-2xl leading-relaxed">
+                    Visualize e analise métricas de desempenho, precisão, tempo de resposta e qualidade das respostas dos modelos de linguagem nas normas técnicas do CBMGO.
+                </p>
+            </div>
+            <div class="ml-8 flex-shrink-0 flex space-x-3">
+                <a href="/analises/comparativo" class="inline-flex items-center px-5 py-2.5 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-xl shadow-sm border border-gray-200 transition-all duration-200 hover:shadow-md">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    Análise Comparativa
+                </a>
+                <a href="/analises/exportar/csv" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Exportar CSV
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Table -->
+    {% if stats_data %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-6 border-b border-gray-100">
+            <h3 class="text-lg font-semibold text-gray-900">Estatísticas por Modelo</h3>
+            <p class="text-sm text-gray-600 mt-1">Métricas detalhadas de desempenho dos modelos LLM</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-100">
+                <thead class="bg-gradient-to-r from-gray-50 to-blue-50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Modelo</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Respostas</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Taxa Acerto</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tempo Médio</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Qualidade</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Fontes</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Somatório</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-50">
+                    {% for stat in stats_data %}
+                    <tr class="hover:bg-blue-50 transition-colors duration-150">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm font-semibold text-gray-900">{{ stat.modelo }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-blue-100 text-blue-800">
+                                {{ stat.total_respostas }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-sm font-medium text-gray-900">{{ stat.taxa_acerto }}%</span>
+                                <div class="flex-1 w-20 bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-gradient-to-r from-green-500 to-green-600 h-2.5 rounded-full transition-all duration-300" style="width: {{ stat.taxa_acerto }}%"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="text-sm font-medium text-gray-900">{{ stat.tempo_medio }}s</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex space-x-1">
+                                <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-lg">C:{{ stat.clareza_media }}</span>
+                                <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-lg">P:{{ stat.precisao_media }}</span>
+                                <span class="inline-flex items-center px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-lg">Co:{{ stat.concisao_media }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-sm font-medium text-gray-900">{{ stat.taxa_fontes }}%</span>
+                                <div class="flex-1 w-16 bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: {{ stat.taxa_fontes }}%"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-3 py-1 rounded-lg text-sm font-bold bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-sm">
+                                {{ stat.somatorio_medio }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Taxa de Acerto -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Taxa de Acerto por Modelo</h3>
+                        <p class="text-sm text-gray-600">Percentual de respostas corretas</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <div id="grafico-acerto">
+                    {{ grafico_acerto|safe }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Tempo Médio -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-6 border-b border-gray-100">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Tempo Médio de Resposta</h3>
+                        <p class="text-sm text-gray-600">Performance de velocidade dos modelos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <div id="grafico-tempo">
+                    {{ grafico_tempo|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Radar Chart -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-6 border-b border-gray-100">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Comparação de Qualidade</h3>
+                    <p class="text-sm text-gray-600">Análise multidimensional dos top 5 modelos</p>
+                </div>
+            </div>
+        </div>
+        <div class="p-6">
+            <div id="grafico-radar">
+                {{ grafico_radar|safe }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis by Technical Standard -->
+    {% if stats_norma_data %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-6 border-b border-gray-100">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Análise por Norma Técnica</h3>
+                    <p class="text-sm text-gray-600">Performance dos modelos agrupada por norma</p>
+                </div>
+            </div>
+        </div>
+        <div class="p-6">
+            <div id="grafico-norma">
+                {{ grafico_norma|safe }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Insights -->
+    {% if stats_data %}
+    <div class="bg-gradient-to-br from-blue-50 via-white to-purple-50 rounded-2xl p-6 border border-blue-200">
+        <div class="flex items-start space-x-4">
+            <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">Insights Automáticos</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {% if stats_data|length > 0 %}
+                        {% set melhor_acerto = stats_data|sort(attribute='taxa_acerto', reverse=true)|first %}
+                        {% set melhor_tempo = stats_data|sort(attribute='tempo_medio')|first %}
+                        {% set melhor_qualidade = stats_data|sort(attribute='somatorio_medio', reverse=true)|first %}
+                        
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-green-200">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Melhor Taxa de Acerto</p>
+                                </div>
+                            </div>
+                            <p class="text-lg font-bold text-gray-900">{{ melhor_acerto.modelo }}</p>
+                            <p class="text-sm text-green-600 font-medium">{{ melhor_acerto.taxa_acerto }}% de acertos</p>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-blue-200">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Mais Rápido</p>
+                                </div>
+                            </div>
+                            <p class="text-lg font-bold text-gray-900">{{ melhor_tempo.modelo }}</p>
+                            <p class="text-sm text-blue-600 font-medium">{{ melhor_tempo.tempo_medio }}s por resposta</p>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-4 shadow-sm border border-purple-200">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-600">Melhor Qualidade</p>
+                                </div>
+                            </div>
+                            <p class="text-lg font-bold text-gray-900">{{ melhor_qualidade.modelo }}</p>
+                            <p class="text-sm text-purple-600 font-medium">{{ melhor_qualidade.somatorio_medio }} pontos</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="text-center py-16 bg-white rounded-xl shadow-sm border border-gray-100">
+        <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center">
+            <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Nenhum dado para análise</h3>
+        <p class="text-gray-600 mb-8 max-w-md mx-auto">
+            Execute alguns experimentos primeiro para gerar análises estatísticas detalhadas e visualizações comparativas dos modelos LLM.
+        </p>
+        <a href="/experimentos/novo" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Criar Primeiro Experimento
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
