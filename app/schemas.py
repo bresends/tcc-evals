@@ -41,6 +41,8 @@ class ModeloLLM(ModeloLLMBase):
 class RespostaBase(BaseModel):
     pergunta_id: int = Field(..., ge=1, description="ID da pergunta")
     modelo_id: int = Field(..., ge=1, description="ID do modelo LLM")
+    configuracao: str = Field(..., min_length=1, max_length=50, description="Configuração experimental")
+    resposta_dada: Optional[str] = Field(None, description="Resposta gerada pelo modelo")
     tempo_primeira_resposta: Optional[Decimal] = Field(None, ge=0, description="Tempo primeira resposta (s)")
     tempo_total: Optional[Decimal] = Field(None, ge=0, description="Tempo total (s)")
     resposta_correta: bool = Field(False, description="Resposta está correta?")
@@ -68,6 +70,8 @@ class Resposta(RespostaBase):
 
 
 class RespostaUpdate(BaseModel):
+    configuracao: Optional[str] = Field(None, min_length=1, max_length=50)
+    resposta_dada: Optional[str] = None
     tempo_primeira_resposta: Optional[Decimal] = None
     tempo_total: Optional[Decimal] = None
     resposta_correta: Optional[bool] = None

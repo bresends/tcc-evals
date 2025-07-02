@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, Text, DECIMAL, ForeignKey, DateTime
+from sqlalchemy import Boolean, Column, Integer, String, Text, DECIMAL, ForeignKey, DateTime, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
@@ -47,6 +47,12 @@ class Resposta(Base):
     pergunta_id = Column(Integer, ForeignKey("perguntas.id"), nullable=False)
     modelo_id = Column(Integer, ForeignKey("modelos_llm.id"), nullable=False)
     
+    # Configuração experimental
+    configuracao = Column(String(50), nullable=False, default="default", index=True)  # ex: "no-rag", "agentic-rag"
+    
+    # Resposta do modelo
+    resposta_dada = Column(Text)  # Texto da resposta gerada pelo modelo
+    
     # Métricas de tempo
     tempo_primeira_resposta = Column(DECIMAL(5, 2))  # segundos
     tempo_total = Column(DECIMAL(5, 2))  # segundos
@@ -71,6 +77,11 @@ class Resposta(Base):
     # Relacionamentos
     pergunta = relationship("Pergunta", back_populates="respostas")
     modelo = relationship("ModeloLLM", back_populates="respostas")
+    
+    # Constraint para evitar duplicatas de pergunta+modelo+configuracao
+    __table_args__ = (
+        UniqueConstraint('pergunta_id', 'modelo_id', 'configuracao', name='unique_resposta_config'),
+    )
     
     def calcular_somatorio(self):
         """Calcula o somatório das métricas de qualidade"""

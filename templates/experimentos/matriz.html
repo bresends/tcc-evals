@@ -5,10 +5,40 @@
 {% block content %}
 <div class="space-y-6">
     <!-- Header -->
-    <div class="flex justify-between items-center">
+    <div class="flex justify-between items-start">
         <div>
             <h2 class="text-3xl font-bold text-gray-900">Matriz de Experimentos</h2>
             <p class="mt-2 text-sm text-gray-600">Visualização em grid: Perguntas vs Modelos LLM</p>
+            
+            <!-- Filtro de Configuração -->
+            <div class="mt-4">
+                <label for="config-select" class="block text-sm font-medium text-gray-700 mb-2">
+                    Configuração Experimental:
+                </label>
+                <select id="config-select" onchange="changeConfiguration()" 
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white">
+                    <!-- Configurações em ordem específica -->
+                    <option value="no-rag" {% if "no-rag" == configuracao_selecionada %}selected{% endif %}>No RAG</option>
+                    <option value="simple-rag" {% if "simple-rag" == configuracao_selecionada %}selected{% endif %}>Simple RAG</option>
+                    <option value="agentic-rag" {% if "agentic-rag" == configuracao_selecionada %}selected{% endif %}>Agentic RAG</option>
+                    <option value="few-shot" {% if "few-shot" == configuracao_selecionada %}selected{% endif %}>Few Shot</option>
+                    <option value="chain-of-thought" {% if "chain-of-thought" == configuracao_selecionada %}selected{% endif %}>Chain of Thought</option>
+                    
+                    <!-- Configurações adicionais encontradas no banco -->
+                    {% for config in configuracoes %}
+                        {% if config not in ["no-rag", "simple-rag", "agentic-rag", "few-shot", "chain-of-thought"] %}
+                        <option value="{{ config }}" {% if config == configuracao_selecionada %}selected{% endif %}>
+                            {% if config == "markdown-test" %}Markdown Test
+                            {% else %}{{ config|title }}
+                            {% endif %}
+                        </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                <span class="ml-2 text-sm text-gray-500">
+                    ({{ configuracao_selecionada }})
+                </span>
+            </div>
         </div>
         <div class="flex space-x-3">
             <a href="/experimentos" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
@@ -53,9 +83,11 @@
                             Pergunta
                         </th>
                         {% for modelo in modelos %}
-                        <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider min-w-24">
-                            <div class="transform -rotate-45 origin-bottom-left whitespace-nowrap">
-                                {{ modelo.nome }}
+                        <th class="px-2 py-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider min-w-32">
+                            <div class="flex flex-col items-center space-y-1">
+                                <div class="transform -rotate-45 origin-center whitespace-nowrap text-xs max-w-24 truncate" title="{{ modelo.nome }}">
+                                    {{ modelo.nome|replace('openai/', '')|replace('gemini-', 'gem-')|replace('deepseek-', 'ds-')|replace('claude-', 'cl-') }}
+                                </div>
                             </div>
                         </th>
                         {% endfor %}
@@ -74,7 +106,7 @@
                         </td>
                         {% for modelo in modelos %}
                         <td class="px-3 py-3 text-center">
-                            {% set chave = pergunta.id ~ "_" ~ modelo.id %}
+                            {% set chave = pergunta.id ~ "_" ~ modelo.id ~ "_" ~ configuracao_selecionada %}
                             {% if matriz[chave] %}
                                 {% set resposta = matriz[chave] %}
                                 <div class="relative group">
@@ -130,7 +162,7 @@
                                     </div>
                                     
                                     <!-- Click handler -->
-                                    <a href="/experimentos/novo?pergunta_id={{ pergunta.id }}&modelo_id={{ modelo.id }}" class="absolute inset-0"></a>
+                                    <a href="/experimentos/novo?pergunta_id={{ pergunta.id }}&modelo_id={{ modelo.id }}&configuracao={{ configuracao_selecionada }}" class="absolute inset-0"></a>
                                 </div>
                             {% endif %}
                         </td>
@@ -224,4 +256,16 @@
         </div>
     </div>
 </div>
+
+<script>
+function changeConfiguration() {
+    const select = document.getElementById('config-select');
+    const selectedConfig = select.value;
+    
+    // Recarregar a página com a nova configuração
+    const url = new URL(window.location);
+    url.searchParams.set('configuracao', selectedConfig);
+    window.location.href = url.toString();
+}
+</script>
 {% endblock %}

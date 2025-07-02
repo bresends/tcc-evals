@@ -14,14 +14,14 @@
     <div class="bg-white shadow rounded-lg">
         <div class="px-4 py-5 sm:p-6">
             <form method="post" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Pergunta -->
                     <div>
                         <label for="pergunta_id" class="block text-sm font-medium text-gray-700">Pergunta</label>
                         <select id="pergunta_id" name="pergunta_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             <option value="">Selecione uma pergunta</option>
                             {% for pergunta in perguntas %}
-                            <option value="{{ pergunta.id }}" {% if resposta and resposta.pergunta_id == pergunta.id %}selected{% endif %}>
+                            <option value="{{ pergunta.id }}" {% if (resposta and resposta.pergunta_id == pergunta.id) or (pergunta_id_preselected and pergunta.id == pergunta_id_preselected) %}selected{% endif %}>
                                 #{{ pergunta.numero }} - {{ pergunta.norma_artigo }}
                             </option>
                             {% endfor %}
@@ -34,10 +34,23 @@
                         <select id="modelo_id" name="modelo_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             <option value="">Selecione um modelo</option>
                             {% for modelo in modelos %}
-                            <option value="{{ modelo.id }}" {% if resposta and resposta.modelo_id == modelo.id %}selected{% endif %}>
+                            <option value="{{ modelo.id }}" {% if (resposta and resposta.modelo_id == modelo.id) or (modelo_id_preselected and modelo.id == modelo_id_preselected) %}selected{% endif %}>
                                 {{ modelo.nome }}
                             </option>
                             {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Configuração -->
+                    <div>
+                        <label for="configuracao" class="block text-sm font-medium text-gray-700">Configuração</label>
+                        <select id="configuracao" name="configuracao" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Selecione uma configuração</option>
+                            <option value="no-rag" {% if (resposta and resposta.configuracao == "no-rag") or (configuracao_preselected == "no-rag") or (not resposta and not configuracao_preselected) %}selected{% endif %}>No RAG</option>
+                            <option value="simple-rag" {% if (resposta and resposta.configuracao == "simple-rag") or (configuracao_preselected == "simple-rag") %}selected{% endif %}>Simple RAG</option>
+                            <option value="agentic-rag" {% if (resposta and resposta.configuracao == "agentic-rag") or (configuracao_preselected == "agentic-rag") %}selected{% endif %}>Agentic RAG</option>
+                            <option value="few-shot" {% if (resposta and resposta.configuracao == "few-shot") or (configuracao_preselected == "few-shot") %}selected{% endif %}>Few Shot</option>
+                            <option value="chain-of-thought" {% if (resposta and resposta.configuracao == "chain-of-thought") or (configuracao_preselected == "chain-of-thought") %}selected{% endif %}>Chain of Thought</option>
                         </select>
                     </div>
                 </div>
@@ -113,6 +126,46 @@
                     </div>
                 </div>
 
+                <!-- Resposta do Modelo -->
+                <div class="border-t border-gray-200 pt-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <label for="resposta_dada" class="block text-sm font-medium text-gray-700">Resposta do Modelo</label>
+                        {% if resposta and resposta.resposta_dada %}
+                        <div class="flex space-x-2">
+                            <button type="button" id="edit-mode-btn" onclick="setResponseMode('edit')" 
+                                    class="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                                ✏️ Editar
+                            </button>
+                            <button type="button" id="preview-mode-btn" onclick="setResponseMode('preview')" 
+                                    class="px-3 py-1.5 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors">
+                                👁️ Visualizar
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Textarea para edição -->
+                    <textarea id="resposta_dada" name="resposta_dada" rows="6" 
+                              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500{% if resposta and resposta.resposta_dada %} hidden{% endif %}"
+                              placeholder="Cole aqui a resposta gerada pelo modelo LLM..." 
+                              oninput="updatePreview()">{% if resposta and resposta.resposta_dada %}{{ resposta.resposta_dada }}{% endif %}</textarea>
+                    
+                    <!-- Visualização markdown -->
+                    {% if resposta and resposta.resposta_dada %}
+                    <div id="response-preview" class="mt-1 p-4 border border-gray-300 rounded-md bg-gray-50 min-h-32">
+                        <div id="markdown-preview" class="prose max-w-none"></div>
+                    </div>
+                    {% else %}
+                    <div id="response-preview" class="hidden mt-1 p-4 border border-gray-300 rounded-md bg-gray-50 min-h-32">
+                        <div id="markdown-preview" class="prose max-w-none"></div>
+                    </div>
+                    {% endif %}
+                    
+                    <p class="mt-2 text-sm text-gray-500">
+                        💡 Dica: Use formatação markdown para melhor legibilidade (cabeçalhos, listas, código, etc.)
+                    </p>
+                </div>
+
                 <!-- Observações -->
                 <div class="border-t border-gray-200 pt-6">
                     <label for="observacoes" class="block text-sm font-medium text-gray-700">Observações</label>
@@ -149,6 +202,7 @@
                         <li><strong>Tempo:</strong> Medido em segundos com precisão de centésimos</li>
                         <li><strong>Qualidade:</strong> Escalas de 1 (ruim) a 5 (excelente)</li>
                         <li><strong>Somatório:</strong> Calculado automaticamente baseado nas métricas</li>
+                        <li><strong>Resposta:</strong> Use markdown para formatação (# Título, **negrito**, `código`)</li>
                         <li><strong>Observações:</strong> Insights qualitativos importantes para análise</li>
                     </ul>
                 </div>
@@ -156,4 +210,78 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize markdown renderer
+    const md = window.markdownit({
+        html: true,
+        linkify: true,
+        typographer: true,
+        breaks: true
+    });
+    
+    // Update preview on page load if there's content
+    updatePreview();
+    
+    // Set initial mode to preview if content exists
+    const textarea = document.getElementById('resposta_dada');
+    if (textarea && textarea.value.trim()) {
+        // Content exists, preview mode is already default
+        // Just ensure the preview is updated
+        updatePreview();
+    }
+});
+
+function setResponseMode(mode) {
+    const textarea = document.getElementById('resposta_dada');
+    const preview = document.getElementById('response-preview');
+    const editBtn = document.getElementById('edit-mode-btn');
+    const previewBtn = document.getElementById('preview-mode-btn');
+    
+    if (mode === 'edit') {
+        textarea.classList.remove('hidden');
+        if (preview) preview.classList.add('hidden');
+        
+        editBtn.classList.remove('bg-gray-100', 'text-gray-700');
+        editBtn.classList.add('bg-blue-100', 'text-blue-700');
+        previewBtn.classList.remove('bg-blue-100', 'text-blue-700');
+        previewBtn.classList.add('bg-gray-100', 'text-gray-700');
+    } else if (mode === 'preview') {
+        textarea.classList.add('hidden');
+        if (preview) {
+            preview.classList.remove('hidden');
+            updatePreview();
+        }
+        
+        previewBtn.classList.remove('bg-gray-100', 'text-gray-700');
+        previewBtn.classList.add('bg-blue-100', 'text-blue-700');
+        editBtn.classList.remove('bg-blue-100', 'text-blue-700');
+        editBtn.classList.add('bg-gray-100', 'text-gray-700');
+    }
+}
+
+function updatePreview() {
+    const textarea = document.getElementById('resposta_dada');
+    const previewContainer = document.getElementById('markdown-preview');
+    
+    if (!textarea || !previewContainer) return;
+    
+    const markdownText = textarea.value;
+    
+    if (markdownText.trim()) {
+        const md = window.markdownit({
+            html: true,
+            linkify: true,
+            typographer: true,
+            breaks: true
+        });
+        
+        const renderedHtml = md.render(markdownText);
+        previewContainer.innerHTML = renderedHtml;
+    } else {
+        previewContainer.innerHTML = '<p class="text-gray-500 italic">Nenhum conteúdo para visualizar</p>';
+    }
+}
+</script>
 {% endblock %}
