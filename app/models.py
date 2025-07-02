@@ -18,6 +18,11 @@ class Pergunta(Base):
     item = Column(String(50), nullable=False, index=True)  # Ex: "6.7.3"
     norma_artigo = Column(String(100), nullable=False)  # Campo combinado para compatibilidade: "NT-09 - 6.7.3"
     
+    # Flags para controle de qualidade e teste
+    flag_resposta_duvidosa = Column(Boolean, default=False, nullable=False)  # Pergunta com resposta possivelmente errada
+    flag_questionario_teste = Column(Boolean, default=False, nullable=False)  # Pergunta selecionada para questionário de teste
+    flag_interessante = Column(Boolean, default=False, nullable=False)  # Pergunta marcada como interessante
+    
     # Relacionamento com respostas
     respostas = relationship("Resposta", back_populates="pergunta")
 

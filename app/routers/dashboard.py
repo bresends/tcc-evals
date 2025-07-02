@@ -31,6 +31,11 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
     # Tempo médio
     tempo_medio = db.query(func.avg(Resposta.tempo_total)).scalar() or 0
     
+    # Estatísticas das flags
+    perguntas_duvidosas = db.query(Pergunta).filter(Pergunta.flag_resposta_duvidosa == True).count()
+    perguntas_teste = db.query(Pergunta).filter(Pergunta.flag_questionario_teste == True).count()
+    perguntas_interessantes = db.query(Pergunta).filter(Pergunta.flag_interessante == True).count()
+    
     # Estatísticas por modelo (top 5)
     stats_modelos = db.query(
         ModeloLLM.nome,
@@ -47,6 +52,9 @@ async def dashboard(request: Request, db: Session = Depends(get_db)):
         "total_respostas": total_respostas,
         "progresso_percentual": round(progresso_percentual, 1),
         "taxa_acerto": round(taxa_acerto, 1),
+        "perguntas_duvidosas": perguntas_duvidosas,
+        "perguntas_teste": perguntas_teste,
+        "perguntas_interessantes": perguntas_interessantes,
         "tempo_medio": round(float(tempo_medio), 2) if tempo_medio else 0,
         "stats_modelos": stats_modelos
     }
