@@ -70,6 +70,11 @@ class Resposta(Base):
     # Observações qualitativas
     observacoes = Column(Text)
     
+    # Campos de anotação manual
+    human_annotation = Column(Boolean, nullable=True, comment="Anotação manual: True=correta, False=incorreta, None=não avaliada")
+    human_annotation_notes = Column(Text, nullable=True, comment="Observações da anotação manual")
+    human_annotation_timestamp = Column(DateTime(timezone=True), nullable=True, comment="Timestamp da anotação manual")
+    
     # Timestamp
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

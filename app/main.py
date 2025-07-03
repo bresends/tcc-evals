@@ -3,7 +3,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from .routers import dashboard, perguntas, experimentos, analises
+from .routers import dashboard, perguntas, experimentos, analises, anotacoes
 from .database import engine
 from . import models
 
@@ -27,6 +27,7 @@ app.include_router(dashboard.router, prefix="", tags=["Dashboard"])
 app.include_router(perguntas.router, prefix="/perguntas", tags=["Perguntas"])
 app.include_router(experimentos.router, prefix="/experimentos", tags=["Experimentos"])
 app.include_router(analises.router, prefix="/analises", tags=["Análises"])
+app.include_router(anotacoes.router, prefix="/anotacoes", tags=["Anotações"])
 
 
 @app.get("/")
