@@ -33,16 +33,27 @@ A CLI do TCC Questions permite executar experimentos automatizados com diferente
 Configure as variáveis no arquivo `.env`:
 
 ```bash
-# Para GitHub Models
-LLM_API_KEY=ghp_your_github_token_here
-LLM_BASE_URL=https://models.github.ai/inference
+# Para DeepSeek API (recomendado)
+LLM_API_KEY=sk-your_deepseek_api_key_here
+LLM_BASE_URL=https://api.deepseek.com
+
+# Para GitHub Models (alternativo)
+# LLM_API_KEY=ghp_your_github_token_here
+# LLM_BASE_URL=https://models.github.ai/inference
 
 # Para OpenAI (alternativo)
-OPENAI_API_KEY=sk-your_openai_key_here
+# OPENAI_API_KEY=sk-your_openai_key_here
 
 # Database (já configurado)
 DATABASE_URL=postgresql://...
 ```
+
+**Como obter chave da API DeepSeek:**
+1. Acesse [https://platform.deepseek.com/](https://platform.deepseek.com/)
+2. Crie uma conta ou faça login
+3. Navegue até "API Keys"
+4. Clique em "Create API Key"
+5. Copie a chave e cole no arquivo `.env`
 
 ### 2. Dependências
 
@@ -211,13 +222,19 @@ uv run python -m app.cli.main run-experiments \
 
 O sistema mapeia automaticamente os nomes dos modelos internos para os nomes da API:
 
-| Modelo Interno | API GitHub Models | API OpenAI |
-|----------------|-------------------|------------|
-| `openai/gpt-4.0` | `OpenAI/gpt-4o` | `gpt-4o` |
-| `openai/gpt-4.1` | `OpenAI/gpt-4o` | `gpt-4o` |
-| `openai/o3` | `OpenAI/o1-preview` | `o1-preview` |
-| `gemini-2.5-pro` | `OpenAI/gpt-4o` | `gpt-4o` |
-| `gemini-2.5-flash` | `OpenAI/gpt-4o-mini` | `gpt-4o-mini` |
+| Modelo Interno | API DeepSeek | API GitHub Models | API OpenAI |
+|----------------|--------------|-------------------|------------|
+| `deepseek-r1` | `deepseek-reasoner` | - | - |
+| `deepseek-v3` | `deepseek-chat` | - | - |
+| `openai/gpt-4.0` | `deepseek-chat` (fallback) | `OpenAI/gpt-4o` | `gpt-4o` |
+| `openai/gpt-4.1` | `deepseek-chat` (fallback) | `OpenAI/gpt-4o` | `gpt-4o` |
+| `openai/o3` | `deepseek-reasoner` (fallback) | `OpenAI/o1-preview` | `o1-preview` |
+| `gemini-2.5-pro` | `deepseek-chat` (fallback) | `OpenAI/gpt-4o` | `gpt-4o` |
+| `gemini-2.5-flash` | `deepseek-chat` (fallback) | `OpenAI/gpt-4o-mini` | `gpt-4o-mini` |
+
+**Modelos DeepSeek disponíveis:**
+- `deepseek-chat`: DeepSeek-V3 (modelo principal de chat)
+- `deepseek-reasoner`: DeepSeek-R1 (modelo de raciocínio avançado)
 
 ## Monitoramento e Logs
 
@@ -312,9 +329,14 @@ uv run python -m app.cli.main status --model "modelo" --config "config"
 
 ## Considerações de Custos
 
+- **DeepSeek**: Muito econômico (~$0.0002/1K tokens input, ~$0.002/1K tokens output)
 - **GitHub Models**: Gratuito com limitações de rate
 - **OpenAI**: Custos por token (GPT-4o: ~$0.005/1K tokens)
-- **Estimativa**: 92 perguntas ≈ 5-10 USD por modelo/configuração
+
+**Estimativa para 92 perguntas:**
+- **DeepSeek**: ~$0.50-1.00 USD por modelo/configuração
+- **GitHub Models**: Gratuito (sujeito a rate limits)
+- **OpenAI**: ~$5-10 USD por modelo/configuração
 
 Use `--dry-run` extensivamente para evitar custos desnecessários durante desenvolvimento.
 

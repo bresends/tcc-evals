@@ -60,7 +60,7 @@ class Resposta(Base):
     # Métricas de qualidade
     resposta_correta = Column(Boolean, nullable=False, default=False)
     clareza = Column(Integer)  # 1-5
-    precisao = Column(Integer)  # 1-5
+    fundamentacao_tecnica = Column(Integer)  # 1-5
     concisao = Column(Integer)  # 1-5
     fonte_citada = Column(Boolean, nullable=False, default=False)
     
@@ -85,7 +85,7 @@ class Resposta(Base):
     
     def calcular_somatorio(self):
         """Calcula o somatório das métricas de qualidade"""
-        metricas = [self.clareza, self.precisao, self.concisao]
+        metricas = [self.clareza, self.fundamentacao_tecnica, self.concisao]
         # Adiciona pontos por resposta correta e fonte citada
         pontos_extras = 0
         if self.resposta_correta:

@@ -28,7 +28,7 @@ async def analises_gerais(request: Request, db: Session = Depends(get_db)):
         func.sum(func.cast(Resposta.resposta_correta, Integer)).label('corretas'),
         func.avg(Resposta.tempo_total).label('tempo_medio'),
         func.avg(Resposta.clareza).label('clareza_media'),
-        func.avg(Resposta.precisao).label('precisao_media'),
+        func.avg(Resposta.fundamentacao_tecnica).label('fundamentacao_media'),
         func.avg(Resposta.concisao).label('concisao_media'),
         func.avg(Resposta.somatorio).label('somatorio_medio'),
         func.sum(func.cast(Resposta.fonte_citada, Integer)).label('fontes_citadas')
@@ -56,7 +56,7 @@ async def analises_gerais(request: Request, db: Session = Depends(get_db)):
             'taxa_acerto': round(taxa_acerto, 1),
             'tempo_medio': round(float(stat.tempo_medio), 2) if stat.tempo_medio else 0,
             'clareza_media': round(float(stat.clareza_media), 2) if stat.clareza_media else 0,
-            'precisao_media': round(float(stat.precisao_media), 2) if stat.precisao_media else 0,
+            'fundamentacao_media': round(float(stat.fundamentacao_media), 2) if stat.fundamentacao_media else 0,
             'concisao_media': round(float(stat.concisao_media), 2) if stat.concisao_media else 0,
             'somatorio_medio': round(float(stat.somatorio_medio), 2) if stat.somatorio_medio else 0,
             'fontes_citadas': stat.fontes_citadas,
@@ -101,13 +101,13 @@ async def analises_gerais(request: Request, db: Session = Depends(get_db)):
         grafico_tempo = plot(fig_tempo, output_type='div', include_plotlyjs=False)
         
         # Gráfico radar - qualidade média
-        categorias = ['Clareza', 'Precisão', 'Concisão', 'Taxa Acerto', 'Taxa Fontes']
+        categorias = ['Clareza', 'Fundamentação', 'Concisão', 'Taxa Acerto', 'Taxa Fontes']
         fig_radar = go.Figure()
         
         for stat in stats_data[:5]:  # Limitar a 5 modelos para não poluir
             valores = [
                 stat['clareza_media'],
-                stat['precisao_media'], 
+                stat['fundamentacao_media'], 
                 stat['concisao_media'],
                 stat['taxa_acerto'] / 20,  # Normalizar para escala 0-5
                 stat['taxa_fontes'] / 20   # Normalizar para escala 0-5
@@ -176,7 +176,7 @@ async def analise_comparativa(request: Request, db: Session = Depends(get_db)):
         Resposta.resposta_correta,
         Resposta.tempo_total,
         Resposta.clareza,
-        Resposta.precisao,
+        Resposta.fundamentacao_tecnica,
         Resposta.concisao,
         Resposta.somatorio,
         Resposta.fonte_citada
@@ -192,13 +192,13 @@ async def analise_comparativa(request: Request, db: Session = Depends(get_db)):
     # Converter para DataFrame para análise
     df = pd.DataFrame(dados_query, columns=[
         'pergunta_numero', 'norma_artigo', 'modelo', 'resposta_correta',
-        'tempo_total', 'clareza', 'precisao', 'concisao', 'somatorio', 'fonte_citada'
+        'tempo_total', 'clareza', 'fundamentacao_tecnica', 'concisao', 'somatorio', 'fonte_citada'
     ])
     
     # Gráfico de correlação entre métricas
     if len(df) > 1:
         # Preparar dados numéricos
-        df_numeric = df[['tempo_total', 'clareza', 'precisao', 'concisao', 'somatorio']].fillna(0)
+        df_numeric = df[['tempo_total', 'clareza', 'fundamentacao_tecnica', 'concisao', 'somatorio']].fillna(0)
         
         # Matriz de correlação
         corr_matrix = df_numeric.corr()
@@ -250,7 +250,7 @@ async def exportar_csv(db: Session = Depends(get_db)):
         Resposta.tempo_total,
         Resposta.resposta_correta,
         Resposta.clareza,
-        Resposta.precisao,
+        Resposta.fundamentacao_tecnica,
         Resposta.concisao,
         Resposta.fonte_citada,
         Resposta.somatorio,
@@ -262,7 +262,7 @@ async def exportar_csv(db: Session = Depends(get_db)):
     df = pd.DataFrame(dados, columns=[
         'Pergunta_Numero', 'Pergunta_Texto', 'Resposta_Esperada', 'Norma_Artigo',
         'Modelo_LLM', 'Tempo_Primeira_Resposta', 'Tempo_Total', 'Resposta_Correta',
-        'Clareza', 'Precisao', 'Concisao', 'Fonte_Citada', 'Somatorio', 'Observacoes',
+        'Clareza', 'Fundamentacao_Tecnica', 'Concisao', 'Fonte_Citada', 'Somatorio', 'Observacoes',
         'Data_Criacao'
     ])
     

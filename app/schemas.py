@@ -47,7 +47,7 @@ class RespostaBase(BaseModel):
     tempo_total: Optional[Decimal] = Field(None, ge=0, description="Tempo total (s)")
     resposta_correta: bool = Field(False, description="Resposta está correta?")
     clareza: Optional[int] = Field(None, ge=1, le=5, description="Clareza (1-5)")
-    precisao: Optional[int] = Field(None, ge=1, le=5, description="Precisão (1-5)")
+    fundamentacao_tecnica: Optional[int] = Field(None, ge=1, le=5, description="Fundamentação técnica (1-5)")
     concisao: Optional[int] = Field(None, ge=1, le=5, description="Concisão (1-5)")
     fonte_citada: bool = Field(False, description="Fonte foi citada?")
     observacoes: Optional[str] = None
@@ -76,7 +76,7 @@ class RespostaUpdate(BaseModel):
     tempo_total: Optional[Decimal] = None
     resposta_correta: Optional[bool] = None
     clareza: Optional[int] = Field(None, ge=1, le=5)
-    precisao: Optional[int] = Field(None, ge=1, le=5)
+    fundamentacao_tecnica: Optional[int] = Field(None, ge=1, le=5)
     concisao: Optional[int] = Field(None, ge=1, le=5)
     fonte_citada: Optional[bool] = None
     observacoes: Optional[str] = None
@@ -91,7 +91,7 @@ class EstatisticaModelo(BaseModel):
     tempo_medio_primeira: Optional[float] = None
     tempo_medio_total: Optional[float] = None
     clareza_media: Optional[float] = None
-    precisao_media: Optional[float] = None
+    fundamentacao_media: Optional[float] = None
     concisao_media: Optional[float] = None
     somatorio_medio: Optional[float] = None
     fontes_citadas: int

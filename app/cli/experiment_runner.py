@@ -218,17 +218,42 @@ Esta resposta foi gerada utilizando a configuração **{self.config}**, que {sel
             # Prepare messages based on configuration
             messages = self._prepare_messages(question_text)
             
-            # Map internal model names to GitHub Models names (publisher/model format)
-            github_model_map = {
-                "openai/gpt-4.0": "OpenAI/gpt-4o",
-                "openai/gpt-4.1": "OpenAI/gpt-4o",
-                "openai/o3": "OpenAI/o1-preview",
-                "gemini-2.5-pro": "OpenAI/gpt-4o",  # Fallback para testes
-                "gemini-2.5-flash": "OpenAI/gpt-4o-mini",  # Fallback para testes
-            }
+            # Map internal model names to API names based on base_url
+            base_url = os.getenv("LLM_BASE_URL", "")
+            
+            if "deepseek" in base_url:
+                # DeepSeek API mapping
+                api_model_map = {
+                    "deepseek-r1": "deepseek-reasoner",
+                    "deepseek-v3": "deepseek-chat",
+                    "claude-opus-4": "deepseek-chat",  # Fallback para testes
+                    "gemini-2.5-pro": "deepseek-chat",  # Fallback para testes
+                    "gemini-2.5-flash": "deepseek-chat",  # Fallback para testes
+                    "openai/gpt-4.0": "deepseek-chat",  # Fallback para testes
+                    "openai/gpt-4.1": "deepseek-chat",  # Fallback para testes
+                    "openai/o3": "deepseek-reasoner",  # Fallback para testes
+                }
+            elif "github" in base_url:
+                # GitHub Models mapping (publisher/model format)
+                api_model_map = {
+                    "openai/gpt-4.0": "OpenAI/gpt-4o",
+                    "openai/gpt-4.1": "OpenAI/gpt-4o",
+                    "openai/o3": "OpenAI/o1-preview",
+                    "gemini-2.5-pro": "OpenAI/gpt-4o",  # Fallback para testes
+                    "gemini-2.5-flash": "OpenAI/gpt-4o-mini",  # Fallback para testes
+                }
+            else:
+                # OpenAI direct mapping
+                api_model_map = {
+                    "openai/gpt-4.0": "gpt-4o",
+                    "openai/gpt-4.1": "gpt-4o",
+                    "openai/o3": "o1-preview",
+                    "gemini-2.5-pro": "gpt-4o",  # Fallback para testes
+                    "gemini-2.5-flash": "gpt-4o-mini",  # Fallback para testes
+                }
             
             # Use mapped model name or original if not in map
-            api_model_name = github_model_map.get(self.model_name, self.model_name)
+            api_model_name = api_model_map.get(self.model_name, self.model_name)
             
             response = self.client.chat.completions.create(
                 model=api_model_name,

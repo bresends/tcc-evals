@@ -42,15 +42,18 @@ bunx tailwindcss -i static/css/input.css -o static/css/output.css
 
 ### Running the Application
 ```bash
-# Development with auto-reload
-uv run python run.py
+# Development with FastAPI dev server (recommended)
+uv run fastapi dev app/main.py
+
+# With specific host and port
+uv run fastapi dev app/main.py --host 0.0.0.0 --port 8000
 
 # Alternative with uvicorn directly
-uv run uvicorn app.main:app --reload
+uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 # Development with CSS watching (2 terminals)
 bun run dev  # Terminal 1: CSS watch
-uv run python run.py  # Terminal 2: API server
+uv run fastapi dev app/main.py  # Terminal 2: API server
 ```
 
 ### Database Operations
@@ -75,6 +78,24 @@ uv run isort app/
 
 # Lint code
 uv run flake8 app/
+```
+
+### Automated Evaluation with Groq
+```bash
+# Install dependencies (includes groq package)
+uv sync
+
+# Test Groq integration
+uv run python test_groq_instructor.py
+
+# Run automated evaluation (dry-run first)
+uv run python -m app.cli.main evaluate-batch --model "deepseek-v3" --config "no-rag" --dry-run --max 3
+
+# Run real evaluation with rate limiting
+uv run python -m app.cli.main evaluate-batch --model "deepseek-v3" --config "no-rag" --max 10
+
+# Evaluate all non-evaluated responses for a model/config
+uv run python -m app.cli.main evaluate-batch --model "deepseek-v3" --config "no-rag"
 ```
 
 ## Data Model Architecture
@@ -125,8 +146,17 @@ uv run flake8 app/
 
 **Environment Setup:**
 - Database URL configured via `.env` file (Supabase PostgreSQL)
-- No additional environment variables required
+- Groq API key for automated evaluation via `GROQ_API_KEY` in `.env`
 - Static file serving configured for `/static` route
+
+**Groq API Configuration:**
+```bash
+# Copy example file and configure
+cp .env.example .env
+
+# Add your Groq API key
+GROQ_API_KEY=gsk_your_groq_api_key_here
+```
 
 **Package Management:**
 - Python: UV with pyproject.toml configuration
@@ -136,6 +166,8 @@ uv run flake8 app/
 ## Research Context
 
 This system specifically supports academic research comparing LLM performance on technical fire safety standards. The 10 pre-configured models represent current state-of-the-art LLMs including GPT-4 variants, Gemini, Claude, and others. The 92-question dataset is designed for statistical analysis (ANOVA) comparing model performance across multiple dimensions.
+
+**Automated Evaluation:** The system uses Groq's `llama3-70b-8192` model for automated evaluation of responses, analyzing correctness, technical foundation, clarity, conciseness, and source citation. This enables systematic evaluation of large datasets while maintaining consistency and reducing manual bias.
 
 ## Common Issues and Solutions
 

@@ -1,0 +1,106 @@
+<!-- Componente de Paginação Simples -->
+{% if pagination.total_pages > 1 %}
+<div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+    <!-- Informações da paginação -->
+    <div class="flex-1 flex justify-between sm:hidden">
+        {% if pagination.has_prev %}
+            <button onclick="changePage({{ pagination.page - 1 }})" 
+                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                Anterior
+            </button>
+        {% else %}
+            <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-50 cursor-not-allowed">
+                Anterior
+            </span>
+        {% endif %}
+        
+        {% if pagination.has_next %}
+            <button onclick="changePage({{ pagination.page + 1 }})" 
+                    class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                Próximo
+            </button>
+        {% else %}
+            <span class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-50 cursor-not-allowed">
+                Próximo
+            </span>
+        {% endif %}
+    </div>
+    
+    <!-- Desktop view -->
+    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+        <div class="flex items-center space-x-4">
+            <p class="text-sm text-gray-700">
+                Mostrando
+                <span class="font-medium">{{ pagination.start_item }}</span>
+                até
+                <span class="font-medium">{{ pagination.end_item }}</span>
+                de
+                <span class="font-medium">{{ pagination.total_count }}</span>
+                resultados
+            </p>
+            
+            <!-- Items per page selector -->
+            <div class="flex items-center space-x-2">
+                <label for="per_page" class="text-sm text-gray-700">Por página:</label>
+                <select id="per_page" onchange="changePerPage(this.value)" 
+                        class="block w-20 px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="10" {% if pagination.per_page == 10 %}selected{% endif %}>10</option>
+                    <option value="25" {% if pagination.per_page == 25 %}selected{% endif %}>25</option>
+                    <option value="50" {% if pagination.per_page == 50 %}selected{% endif %}>50</option>
+                    <option value="100" {% if pagination.per_page == 100 %}selected{% endif %}>100</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="flex items-center space-x-1">
+            <!-- Previous button -->
+            {% if pagination.has_prev %}
+                <button onclick="changePage({{ pagination.page - 1 }})" 
+                        class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md">
+                    ← Anterior
+                </button>
+            {% endif %}
+            
+            <!-- Page numbers (simplified) -->
+            {% set start_page = [1, pagination.page - 2] | max %}
+            {% set end_page = [pagination.total_pages, pagination.page + 2] | min %}
+            
+            {% for page_num in range(start_page, end_page + 1) %}
+                {% if page_num == pagination.page %}
+                    <span class="relative inline-flex items-center px-4 py-2 bg-blue-50 border border-blue-500 text-sm font-medium text-blue-600 rounded-md">
+                        {{ page_num }}
+                    </span>
+                {% else %}
+                    <button onclick="changePage({{ page_num }})" 
+                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md">
+                        {{ page_num }}
+                    </button>
+                {% endif %}
+            {% endfor %}
+            
+            <!-- Next button -->
+            {% if pagination.has_next %}
+                <button onclick="changePage({{ pagination.page + 1 }})" 
+                        class="relative inline-flex items-center px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md">
+                    Próximo →
+                </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function changePage(page) {
+    const url = new URL(window.location);
+    url.searchParams.set('page', page);
+    window.location.href = url.toString();
+}
+
+function changePerPage(value) {
+    const url = new URL(window.location);
+    url.searchParams.set('per_page', value);
+    url.searchParams.set('page', '1'); // Reset to first page
+    window.location.href = url.toString();
+}
+</script>
+{% endif %}
